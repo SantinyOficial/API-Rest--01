@@ -1,5 +1,6 @@
 package com.std.ec.controller;
 
+import com.std.ec.model.dto.ClienteDto;
 import com.std.ec.model.entity.Cliente;
 import com.std.ec.service.ICliente;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +20,30 @@ public class ClienteController {
     @Autowired
     private ICliente clienteService;
 
-
     @PostMapping("cliente")
     @ResponseStatus(HttpStatus.CREATED)
-    public Cliente create(@RequestBody Cliente cliente) {
-        return clienteService.save(cliente);
+    public ClienteDto create(@RequestBody ClienteDto clienteDto) {
+        Cliente clienteSave = clienteService.save(clienteDto);
+        return ClienteDto.builder()
+                .idCliente(clienteSave.getIdCliente())
+                .nombre(clienteSave.getNombre())
+                .apellido(clienteSave.getApellido())
+                .email(clienteSave.getEmail())
+                .fechaRegistro(clienteSave.getFechaRegistro())
+                .build();
     }
 
     @PutMapping("cliente")
     @ResponseStatus(HttpStatus.CREATED)
-    public Cliente update(Cliente cliente) {
-        return clienteService.save(cliente);
+    public ClienteDto update(ClienteDto clienteDto) {
+        Cliente clienteUpdate = clienteService.save(clienteDto);
+        return ClienteDto.builder()
+                .idCliente(clienteUpdate.getIdCliente())
+                .nombre(clienteUpdate.getNombre())
+                .apellido(clienteUpdate.getApellido())
+                .email(clienteUpdate.getEmail())
+                .fechaRegistro(clienteUpdate.getFechaRegistro())
+                .build();
     }
 
     @DeleteMapping("cliente/{id}")
@@ -47,14 +61,22 @@ public class ClienteController {
     }
 
     @GetMapping("cliente/{id}")
-    public ResponseEntity<?> showById(@PathVariable Integer id) {
+    public ClienteDto showById(@PathVariable Integer id) {
         Cliente cliente = clienteService.findById(id);
+        return ClienteDto.builder()
+                .idCliente(cliente.getIdCliente())
+                .nombre(cliente.getNombre())
+                .apellido(cliente.getApellido())
+                .email(cliente.getEmail())
+                .fechaRegistro(cliente.getFechaRegistro())
+                .build();
+        /*ClienteDto cliente = clienteService.findById(id);
         if (cliente != null) {
             return new ResponseEntity<>(cliente, HttpStatus.OK);
         } else {
             String error404 = "Cliente no encontrado";
             return new ResponseEntity<>(error404,HttpStatus.NOT_FOUND);
-        }
+        }*/
     }
 
 
