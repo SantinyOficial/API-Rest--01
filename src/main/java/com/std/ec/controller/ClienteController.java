@@ -22,6 +22,7 @@ public class ClienteController {
     }
 
     @PutMapping("cliente")
+    @ResponseStatus(HttpStatus.CREATED)
     public Cliente update(Cliente cliente) {
         return clienteService.save(cliente);
     }
