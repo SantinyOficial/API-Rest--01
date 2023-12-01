@@ -2,6 +2,7 @@ package com.std.ec.controller;
 
 import com.std.ec.model.dto.ClienteDto;
 import com.std.ec.model.entity.Cliente;
+import com.std.ec.model.payload.MensajeResponse;
 import com.std.ec.service.ICliente;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -22,15 +23,29 @@ public class ClienteController {
 
     @PostMapping("cliente")
     @ResponseStatus(HttpStatus.CREATED)
-    public ClienteDto create(@RequestBody ClienteDto clienteDto) {
-        Cliente clienteSave = clienteService.save(clienteDto);
-        return ClienteDto.builder()
-                .idCliente(clienteSave.getIdCliente())
-                .nombre(clienteSave.getNombre())
-                .apellido(clienteSave.getApellido())
-                .email(clienteSave.getEmail())
-                .fechaRegistro(clienteSave.getFechaRegistro())
-                .build();
+    public ResponseEntity<?> create(@RequestBody ClienteDto clienteDto) {
+        Cliente clienteSave = null;
+        try {
+            clienteSave = clienteService.save(clienteDto);
+            return new ResponseEntity<>(MensajeResponse.builder()
+                    .mensaje("Guardado correctamente")
+                    .object(ClienteDto.builder()
+                            .idCliente(clienteSave.getIdCliente())
+                            .nombre(clienteSave.getNombre())
+                            .apellido(clienteSave.getApellido())
+                            .email(clienteSave.getEmail())
+                            .fechaRegistro(clienteSave.getFechaRegistro())
+                            .build())
+                    .build()
+                    ,HttpStatus.CREATED);
+        } catch (DataAccessException e) {
+            return new ResponseEntity<>(
+                    MensajeResponse.builder()
+                            .mensaje(e.getMessage())
+                            .object(null)
+                            .build()
+                    ,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("cliente")
@@ -48,15 +63,17 @@ public class ClienteController {
 
     @DeleteMapping("cliente/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
-        Map<String, Object> response = new HashMap<>();
         try {
             Cliente clienteDelete = clienteService.findById(id);
             clienteService.delete(clienteDelete);
             return new ResponseEntity<>(clienteDelete, HttpStatus.NO_CONTENT);
-        } catch(DataAccessException e) {
-            response.put("mensaje", e.getMessage());
-            response.put("cliente", null);
-            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (DataAccessException e) {
+            return new ResponseEntity<>(
+                    MensajeResponse.builder()
+                            .mensaje(e.getMessage())
+                            .object(null)
+                            .build()
+                    , HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -70,13 +87,7 @@ public class ClienteController {
                 .email(cliente.getEmail())
                 .fechaRegistro(cliente.getFechaRegistro())
                 .build();
-        /*ClienteDto cliente = clienteService.findById(id);
-        if (cliente != null) {
-            return new ResponseEntity<>(cliente, HttpStatus.OK);
-        } else {
-            String error404 = "Cliente no encontrado";
-            return new ResponseEntity<>(error404,HttpStatus.NOT_FOUND);
-        }*/
+
     }
 
 
